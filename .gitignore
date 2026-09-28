@@ -1,0 +1,20 @@
+# Local account and simulation state
+/data/users.csv
+/data/wallets.csv
+/data/transactions.csv
+# Build output
+/build/
+/trading-simulator
+/app
+*.exe
+*.o
+*.obj
+*.pdb
+*.ilk
+# Local settings
+.vscode/
+.idea/
+.env
+.env.*
+.DS_Store
+Thumbs.db
