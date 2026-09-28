@@ -1,10 +1,21 @@
-// Program entry point: constructs App and starts the main loop.
 #include "App.h"
+#include <iostream>
 
-// Creates the App object and starts the program.
 int main()
 {
-    App app;
-    app.run();
+    try
+    {
+        App app;
+        app.run();
+    }
+    catch (const std::ios_base::failure&)
+    {
+        std::cout << "\nGoodbye.\n";
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << error.what() << "\n";
+        return 1;
+    }
     return 0;
 }

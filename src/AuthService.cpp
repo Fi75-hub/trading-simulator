@@ -1,4 +1,4 @@
-// Implements registration, login and password reset using UserStore (Task 2).
+// Implements registration, login and password changes using UserStore (Task 2).
 #include "AuthService.h"
 #include "Util.h"
 #include <iostream>
@@ -14,6 +14,12 @@ bool AuthService::registerUser(User& outUser)
     std::string fullName = util::readNonEmpty("Full name: ");
     std::string email = util::readNonEmpty("Email: ");
     std::string password = util::readNonEmpty("Password: ");
+
+    if (fullName.find(',') != std::string::npos || email.find(',') != std::string::npos)
+    {
+        std::cout << "Names and emails cannot contain commas in this CSV demo.\n";
+        return false;
+    }
 
     User existing;
     if (store_.personExists(fullName, email, existing))
@@ -68,17 +74,17 @@ bool AuthService::login(User& outUser)
     return false;
 }
 
-// Resets the password after verifying username and email, then updates users.csv with the new hash.
+// Changes a password only after checking the current password.
 bool AuthService::resetPassword()
 {
     std::string username = util::readNonEmpty("Username: ");
-    std::string email = util::readNonEmpty("Email: ");
+    std::string password = util::readNonEmpty("Current password: ");
 
     User found;
     bool ok = false;
     for (const auto& u : store_.loadAll())
     {
-        if (u.username == username && u.email == email)
+        if (u.username == username && u.passwordHash == util::passwordHash(password))
         {
             found = u;
             ok = true;
@@ -87,7 +93,7 @@ bool AuthService::resetPassword()
     }
     if (!ok)
     {
-        std::cout << "No matching account found.\n";
+        std::cout << "Username or current password is incorrect.\n";
         return false;
     }
 

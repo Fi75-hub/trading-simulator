@@ -1,10 +1,10 @@
-// Registration, login, and password reset logic (Task 2).
+// Registration, login, and password changes (Task 2).
 #pragma once
 #include <string>
 #include "User.h"
 #include "UserStore.h"
 
-// AuthService provides the Task 2 flows: register, login and reset.
+// AuthService provides the Task 2 account flows.
 class AuthService
 {
 public:
@@ -15,7 +15,7 @@ public:
     bool registerUser(User& outUser);
     // Validates username/password and returns the user on success.
     bool login(User& outUser);
-    // Resets the password after verifying the account details.
+    // Changes the password after verifying the current password.
     bool resetPassword();
 
 private:

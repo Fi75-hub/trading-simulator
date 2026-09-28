@@ -9,7 +9,7 @@ A C++ console application for exploring historical cryptocurrency order data, ge
 - Register a local demo account and log in using a generated ten-digit username.
 - Deposit and withdraw simulated funds, view wallet balances and review recent transactions.
 - Filter trading statistics by product and date prefix.
-- Generate sample bids and asks using historical reference prices and the current timestamp.
+- Generate sample bids and asks using historical reference prices and the current timestamp. The simulation adds fictional funds when needed.
 - Persist local account, wallet and transaction state in CSV files.
 
 ## Technology
@@ -43,7 +43,7 @@ Run from the repository root so the relative `data/` paths resolve. The folder m
 - `data/20200601.csv`: the first **10,000 rows** of the original 1,021,772-row coursework dataset, kept at the filename expected by the application. This sample contains all five currency pairs, both ask and bid orders, and 22 timestamps.
 - `data/20200317.csv`: the smaller supplied market dataset, retained in full.
 
-The full June dataset remains in the original local coursework folder and has not been replaced there. The sample keeps this portfolio copy lightweight; its summaries represent only the included rows. Both supplied files cover a single date, so the current samples do not demonstrate changes over multiple days or years. Market CSV files were supplied with the coursework and are not claimed as original data collection.
+Summaries use only the included rows. Both supplied files cover a single date, so the current samples do not demonstrate changes over multiple days or years. Market CSV files were supplied with the coursework and are not claimed as original data collection.
 
 ## Project structure
 
@@ -55,4 +55,15 @@ data/      Historical market samples; local state is generated here
 
 ## Scope
 
-This is an educational simulation with historical data and fictional balances. It does not connect to an exchange or execute real trades. Authentication is a coursework implementation using `std::hash` and a simplified reset flow; use fictional details and a disposable password. It is not a production account system.
+This is an educational simulation with historical data and fictional balances. It does not connect to an exchange or execute real trades. Authentication uses `std::hash` for this coursework exercise; use fictional details and a disposable password. Changing a password requires the current password. There is no account recovery service. It is not a production account system.
+
+## Tests
+
+Compile the regression checks from the repository root:
+
+```sh
+g++ -std=c++17 -Wall -Wextra -I include tests/domain_tests.cpp src/AuthService.cpp src/UserStore.cpp src/Util.cpp src/MarketData.cpp src/CSV.cpp -o domain-tests
+./domain-tests
+```
+
+On Windows, use `-o domain-tests.exe` and run `.\domain-tests.exe`. The checks use temporary files to cover wallet precision, invalid inputs, password changes and OHLC grouping.

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <iostream>
 #include <limits>
+#include <cmath>
 #include <random>
 
 namespace util
@@ -45,7 +46,7 @@ namespace util
     {
         std::cout << prompt;
         std::string line;
-        std::getline(std::cin, line);
+        if (!std::getline(std::cin, line)) throw std::ios_base::failure("Input closed.");
         return trim(line);
     }
 
@@ -65,17 +66,7 @@ namespace util
     {
         for (;;)
         {
-            std::cout << prompt;
-
-            std::string line;
-            if (!std::getline(std::cin >> std::ws, line))
-            {
-                std::cin.clear();
-                std::cout << "Invalid input. Try again.\n";
-                continue;
-            }
-
-            line = trim(line);
+            std::string line = readLine(prompt);
             if (line.empty())
             {
                 std::cout << "Invalid input. Try again.\n";
@@ -108,20 +99,15 @@ namespace util
     {
         for (;;)
         {
-            std::cout << prompt;
-            double v{};
-            if (std::cin >> v)
+            const std::string line = readLine(prompt);
+            try
             {
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                if (v > 0) return v;
-                std::cout << "Enter a positive amount.\n";
+                std::size_t consumed = 0;
+                const double value = std::stod(line, &consumed);
+                if (consumed == line.size() && std::isfinite(value) && value > 0) return value;
             }
-            else
-            {
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cout << "Invalid number. Try again.\n";
-            }
+            catch (const std::exception&) {}
+            std::cout << "Enter a finite positive amount.\n";
         }
     }
 

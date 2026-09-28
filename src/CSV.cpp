@@ -3,6 +3,7 @@
 #include "Util.h"
 #include <fstream>
 #include <stdexcept>
+#include <cmath>
 
 static OrderSide parseSide(const std::string& s)
 {
@@ -37,8 +38,11 @@ std::vector<Order> CSV::readMarketFile(const std::string& filename)
             o.timestamp = parts[0];
             o.product = parts[1];
             o.side = parseSide(parts[2]);
-            o.price = std::stod(parts[3]);
-            o.amount = std::stod(parts[4]);
+            std::size_t priceEnd = 0, amountEnd = 0;
+            o.price = std::stod(parts[3], &priceEnd);
+            o.amount = std::stod(parts[4], &amountEnd);
+            if (priceEnd != parts[3].size() || amountEnd != parts[4].size() ||
+                !std::isfinite(o.price) || !std::isfinite(o.amount) || o.price <= 0 || o.amount <= 0) continue;
             out.push_back(o);
         }
         catch (...)
@@ -48,5 +52,6 @@ std::vector<Order> CSV::readMarketFile(const std::string& filename)
         }
     }
 
+    if (out.empty()) throw std::runtime_error("No valid orders in file: " + filename);
     return out;
 }

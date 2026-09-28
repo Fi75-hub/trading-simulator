@@ -109,17 +109,12 @@ std::vector<Candlestick> MarketData::candlesticks(const std::string& product, Or
     for (auto& kv : groups)
     {
         auto& v = kv.second;
-        std::sort(v.begin(), v.end(), [](const Order& a, const Order& b){
+        std::stable_sort(v.begin(), v.end(), [](const Order& a, const Order& b){
             return a.timestamp < b.timestamp;
         });
 
         Candlestick c;
-        std::string label = kv.first;
-        if (!v.empty() && v.front().timestamp.size() >= 10)
-        {
-            label = v.front().timestamp.substr(0, 10);
-        }
-        c.period = label;
+        c.period = kv.first;
         c.open = v.front().price;
         c.close = v.back().price;
 

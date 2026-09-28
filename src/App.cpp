@@ -7,12 +7,14 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <stdexcept>
+#include <algorithm>
 
 App::App()
 : store_("data/users.csv", "data/wallets.csv", "data/transactions.csv")
 , auth_(store_)
 {
-    store_.ensureFiles();
+    if (!store_.ensureFiles()) throw std::runtime_error("Could not create local account files. Run from a writable repository root.");
 }
 
 // Prompts for a market CSV path until it loads successfully.
@@ -46,7 +48,7 @@ User App::authenticate()
 {
     for (;;)
     {
-        std::cout << "1) Login\n2) Register\n3) Reset password\n4) Exit\n";
+        std::cout << "1) Login\n2) Register\n3) Change password\n4) Exit\n";
         int c = util::readIntInRange("Choose: ", 1, 4);
 
         User u;
@@ -318,6 +320,11 @@ void App::menuFunds(const User& user)
         std::string cur = util::readNonEmpty("Currency (e.g., USDT, BTC): ");
         for (char& ch : cur) ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
 
+        if (cur.size() > 12 || !std::all_of(cur.begin(), cur.end(), [](unsigned char ch) { return std::isalnum(ch); }))
+        {
+            std::cout << "Use a currency code of up to 12 letters or digits.\n";
+            continue;
+        }
         double amt = util::readDoublePositive("Amount: ");
         double delta = (c == 1) ? amt : -amt;
 

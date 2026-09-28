@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <cmath>
+#include <iomanip>
+#include <limits>
 
 UserStore::UserStore(std::string usersCsvPath, std::string walletsCsvPath, std::string transactionsCsvPath)
 : usersCsv_(std::move(usersCsvPath)), walletsCsv_(std::move(walletsCsvPath)), transactionsCsv_(std::move(transactionsCsvPath))
@@ -34,7 +37,7 @@ bool UserStore::ensureFiles()
             out << "username,currency,balance\n";
         }
     }
-    
+
     // transactions.csv
     {
         std::ifstream in(transactionsCsv_);
@@ -242,6 +245,7 @@ std::map<std::string,double> UserStore::loadWallet(const std::string& username) 
 // Applies a deposit/withdraw delta with negative balance protection, then writes the updated wallet file.
 bool UserStore::adjustWallet(const std::string& username, const std::string& currency, double delta, double& newBalance)
 {
+    if (!std::isfinite(delta)) return false;
     // Load all rows and rewrite the file.
     struct Row { std::string u; std::string c; double b; };
     std::vector<Row> rows;
@@ -291,7 +295,7 @@ bool UserStore::adjustWallet(const std::string& username, const std::string& cur
     {
         if (r.u == username && r.c == currency)
         {
-            if (r.b + delta < 0) return false;
+            if (!std::isfinite(r.b + delta) || r.b + delta < 0) return false;
             r.b += delta;
             newBalance = r.b;
             found = true;
@@ -307,6 +311,7 @@ bool UserStore::adjustWallet(const std::string& username, const std::string& cur
 
     std::ofstream out(walletsCsv_);
     if (!out.is_open()) return false;
+    out << std::setprecision(std::numeric_limits<double>::max_digits10);
     out << "username,currency,balance\n";
     for (const auto& r : rows)
     {
@@ -321,6 +326,7 @@ bool UserStore::appendTransaction(const std::string& username, const Transaction
     std::ofstream out(transactionsCsv_, std::ios::app);
     if (!out.is_open()) return false;
 
+    out << std::setprecision(std::numeric_limits<double>::max_digits10);
     out << username << ","
         << t.timestamp << ","
         << t.product << ","
